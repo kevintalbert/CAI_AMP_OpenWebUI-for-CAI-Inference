@@ -60,17 +60,11 @@ echo ""
 echo "[2/3] Starting Open WebUI on 0.0.0.0:$PORT"
 echo ""
 
-# Strip trailing /chat/completions from the inference base URL (same as run_app.py).
-OPENAI_API_BASE_URLS="$(echo "${INFERENCE_SERVICE_BASE_URL:-}" | sed 's/\/chat\/completions$//')"
-export OPENAI_API_BASE_URLS
-
-# Prefer JWT_TOKEN when the platform injects it; otherwise read access_token from /tmp/jwt.
-if [ -n "${JWT_TOKEN:-}" ]; then
-    OPENAI_API_KEYS="$JWT_TOKEN"
-else
-    OPENAI_API_KEYS="$(grep -o '"access_token":"[^"]*' "/tmp/jwt" | sed 's/"access_token":"//')"
+# Optional: pre-wire default OpenAI-compatible base URL (users still add API keys in Open WebUI).
+if [ -n "${INFERENCE_SERVICE_BASE_URL:-}" ]; then
+    OPENAI_API_BASE_URLS="$(echo "${INFERENCE_SERVICE_BASE_URL}" | sed 's/\/chat\/completions$//')"
+    export OPENAI_API_BASE_URLS
 fi
-export OPENAI_API_KEYS
 
 export WEBUI_AUTH=False
 

@@ -1,4 +1,4 @@
-# AMP for Open WebUI with the CML AI Inference Service
+# Open WebUI with the CAI Inference Service
 
 ![](/assets/catalog-icon.png)
 
@@ -25,11 +25,11 @@ Below illustrates an example of the deployed AMP and leverages a simple query us
 
 ## Deployment
 
-You can run this repository in two ways. **Deployment 1** uses the AMP catalog and CML project tasks (`install_dependencies.py`, `run_app.py`). **Deployment 2** targets **Cloudera AI Inference Applications** (or equivalent AI Inference application hosting): you supply `entry.sh` as the application entrypoint; the platform runs it and Open WebUI behaves the same once it is open.
+You can run this repository in two ways. **Deployment 1** uses the AMP catalog and CAI project tasks (`install_dependencies.py`, `run_app.py`). **Deployment 2** targets **Cloudera AI Inference Applications** (or equivalent AI Inference application hosting): you supply `entry.sh` as the application entrypoint; the platform runs it and Open WebUI behaves the same once it is open.
 
 ### Deployment 1 (AMP)
 
-Deploy from the AMP catalog as shown below. If you do not see it in the community catalog, you can add `https://raw.githubusercontent.com/kevinbtalbert/CML_AMP_OpenWebUI-for-CML-AI-Inference/refs/heads/main/catalog-entry.yaml` to your AMP custom catalog entries.
+Deploy from the AMP catalog as shown below. If you do not see it in the community catalog, you can add `https://raw.githubusercontent.com/kevintalbert/CML_AMP_OpenWebUI-for-CML-AI-Inference/refs/heads/main/catalog-entry.yaml` to your AMP custom catalog entries.
 
 ![](/assets/amp-deployment-1.png)
 
@@ -54,30 +54,39 @@ After the AMP is deployed, either click "Open" or navigate to the Applications t
 
 ### Deployment 2 (AI Inference Applications)
 
-Use this path when you deploy the same codebase as a **Cloudera AI Inference application** (or similar “application” workload backed by CAI Inference), not from the AMP catalog.
+Use this path when you deploy this repository as a **Cloudera AI Inference application** (a serving workload backed by CAI Inference), instead of using the AMP catalog. The app starts via **`entry.sh`**; you wire the model endpoint and bearer token inside Open WebUI (not via `entry.sh`).
 
-1. **Repository** — Point your application build at this repository (or a fork) so the working directory contains `entry.sh`, `requirements.txt`, and the rest of the project files.
+#### Create the application
 
-2. **Launch command** — Configure the application to start with **`./entry.sh`** (or `bash entry.sh`) from the repository root. The script installs dependencies from `requirements.txt`, applies the Open WebUI `google.colab` path workaround, then runs `open-webui serve` bound to `0.0.0.0` and the port given by the platform.
+In Cloudera AI, open **Applications** → **Create Application**. Pick your **environment and inference service**, set **Name** and **Subdomain** (for example `open-web-ui` / `chat`), choose **Git** as the source, and point the clone at **this** repository with entry point **`entry.sh`**. A typical Git URL is `https://github.com/kevintalbert/CML_AMP_OpenWebUI-for-CML-AI-Inference.git` (use your fork if you maintain one).
 
-3. **Environment variables** — Set at least the following (names match what `entry.sh` expects):
+![](/assets/deploy-1.png)
 
-   | Variable | Purpose |
-   | --- | --- |
-   | `INFERENCE_SERVICE_BASE_URL` | Base URL for your CAI Inference model endpoint (same value you would paste for the AMP). May include a trailing `/chat/completions` segment; `entry.sh` strips it when setting `OPENAI_API_BASE_URLS` for Open WebUI. |
-   | `CDSW_APP_PORT` | HTTP port the process must listen on. Inference application runtimes typically inject this; if unset locally, `entry.sh` defaults to `8080`. |
+On the same flow, choose **SSO** or **JWT** for how users reach the application URL, set **CPU**, **memory**, and optional **autoscale**, and add any **environment variables** you need. The platform usually sets **`CDSW_APP_PORT`** for the HTTP port. Optionally set **`INFERENCE_SERVICE_BASE_URL`** if your deployment UI allows a full URL; `entry.sh` will export `OPENAI_API_BASE_URLS` when that variable is set. If tag rules prevent storing a URL in env vars, skip it and paste the URL only in Open WebUI (next subsection). For a one-time dump of all process environment variables at startup, set **`ENTRY_SH_PRINT_ENV=1`** and check application logs, then remove it so secrets are not logged on every restart.
 
-4. **Authentication token** — `entry.sh` sets `OPENAI_API_KEYS` by reading the JWT from **`/tmp/jwt`** (same pattern as `run_app.py`). Ensure your Inference application runtime provides that file so Open WebUI can call the inference API with a valid bearer token.
+![](/assets/deploy-2.png)
 
-5. **Usage** — Open the application URL from your Inference Applications UI. Chat, attachments, and model selection work the same as in **Deployment 1**; only how the container is built and started differs.
+Submit **Create Application** and wait until the app is healthy, then open its URL from the Applications list.
 
-## AMP Usage
-This was tested using the modern runtime below on the most recent version at the time, `2024.10`.
-```yaml
-   - editor: PBJ Workbench
-   - kernel: Python 3.11
-   - edition: Standard
-```
+#### Point Open WebUI at your model (URL + bearer token)
+
+`entry.sh` does not inject inference credentials. An administrator (or a user, depending on your policy) configures an **OpenAI-compatible** connection in Open WebUI: your CAI model endpoint base URL and a **Bearer** token from the inference service.
+
+Open the **user** menu (bottom of the sidebar), then choose **Admin Panel** so you can use the top **Settings** area (regular **Settings** from the same menu also exposes **Connections** if you prefer per-user configuration).
+
+![](/assets/setup-model-1.png)
+
+In **Settings** → **Connections**, enable **OpenAI API** and add or edit a connection. Paste the **base URL** of your model endpoint (the same style of URL you would copy from **Model Endpoints** in Cloudera AI; it should end with `/v1` for OpenAI-compatible APIs).
+
+![](/assets/setup-model-2.png)
+
+Open **Edit connection** (gear on the connection). Set **Auth** to **Bearer**, paste the inference **API key or access token**, then **Save**. After that, pick the model from the chat **Select a model** control and run a prompt as usual.
+
+![](/assets/setup-model-3.png)
+
+Chat, attachments, and model selection behave the same as in **Deployment 1**; only deployment and how credentials are supplied differ.
+
+
 
 
 
