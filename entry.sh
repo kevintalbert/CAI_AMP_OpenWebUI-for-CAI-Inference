@@ -27,14 +27,12 @@ echo ""
 # Optional: dump all environment variables (sorted) for platform discovery.
 # Set ENTRY_SH_PRINT_ENV=1 (or true/yes) on the application. Values may include
 # secrets—treat logs accordingly and turn this off in production.
-case "${ENTRY_SH_PRINT_ENV:-}" in
-    1 | [tT]rue | [yY]es)
-        echo "=== ENTRY_SH_PRINT_ENV: full environment (sorted) ==="
-        printenv | LC_ALL=C sort
-        echo "=== end environment ==="
-        echo ""
-        ;;
-esac
+
+echo "=== ENTRY_SH_PRINT_ENV: full environment (sorted) ==="
+printenv | LC_ALL=C sort
+echo "=== end environment ==="
+echo ""
+
 
 # ── Step 0: Install Python dependencies (idempotent) ─────────────────────────
 # The platform may or may not auto-install requirements.txt before calling
