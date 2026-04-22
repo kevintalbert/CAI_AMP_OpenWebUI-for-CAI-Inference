@@ -20,7 +20,7 @@ Below illustrates an example of the deployed AMP and leverages a simple query us
 
 ![](/assets/simple-example.png)
 
-![](/assets/example-with-attachments.png)
+![](/assets/setup-model-4.png)
 
 
 ## Deployment
@@ -62,7 +62,7 @@ In Cloudera AI, open **Applications** → **Create Application**. Pick your **en
 
 ![](/assets/deploy-1.png)
 
-On the same flow, choose **SSO** or **JWT** for how users reach the application URL, set **CPU**, **memory**, and optional **autoscale**, and add any **environment variables** you need. The platform usually sets **`CDSW_APP_PORT`** for the HTTP port. Optionally set **`INFERENCE_SERVICE_BASE_URL`** if your deployment UI allows a full URL; `entry.sh` will export `OPENAI_API_BASE_URLS` when that variable is set. If tag rules prevent storing a URL in env vars, skip it and paste the URL only in Open WebUI (next subsection). For a one-time dump of all process environment variables at startup, set **`ENTRY_SH_PRINT_ENV=1`** and check application logs, then remove it so secrets are not logged on every restart.
+On the same flow, choose **SSO** for how users reach the application URL, set **CPU**, **memory**, and optional **autoscale**. 
 
 ![](/assets/deploy-2.png)
 
@@ -72,7 +72,7 @@ Submit **Create Application** and wait until the app is healthy, then open its U
 
 `entry.sh` does not inject inference credentials. An administrator (or a user, depending on your policy) configures an **OpenAI-compatible** connection in Open WebUI: your CAI model endpoint base URL and a **Bearer** token from the inference service.
 
-Open the **user** menu (bottom of the sidebar), then choose **Admin Panel** so you can use the top **Settings** area (regular **Settings** from the same menu also exposes **Connections** if you prefer per-user configuration).
+Open the **user** menu (bottom of the sidebar), then choose **Admin Panel** so you can use the top **Settings** area.
 
 ![](/assets/setup-model-1.png)
 
@@ -85,9 +85,6 @@ Open **Edit connection** (gear on the connection). Set **Auth** to **Bearer**, p
 ![](/assets/setup-model-3.png)
 
 Chat, attachments, and model selection behave the same as in **Deployment 1**; only deployment and how credentials are supplied differ.
-
-
-
 
 
 Copyright (c) 2026 - Cloudera, Inc.
