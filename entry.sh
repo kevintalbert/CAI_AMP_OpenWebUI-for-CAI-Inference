@@ -24,6 +24,18 @@ echo " Port    : $PORT"
 echo "=================================================="
 echo ""
 
+# Optional: dump all environment variables (sorted) for platform discovery.
+# Set ENTRY_SH_PRINT_ENV=1 (or true/yes) on the application. Values may include
+# secrets—treat logs accordingly and turn this off in production.
+case "${ENTRY_SH_PRINT_ENV:-}" in
+    1 | [tT]rue | [yY]es)
+        echo "=== ENTRY_SH_PRINT_ENV: full environment (sorted) ==="
+        printenv | LC_ALL=C sort
+        echo "=== end environment ==="
+        echo ""
+        ;;
+esac
+
 # ── Step 0: Install Python dependencies (idempotent) ─────────────────────────
 # The platform may or may not auto-install requirements.txt before calling
 # this script. We do it ourselves to be safe; pip skips already-installed pkgs.
@@ -52,7 +64,12 @@ echo ""
 OPENAI_API_BASE_URLS="$(echo "${INFERENCE_SERVICE_BASE_URL:-}" | sed 's/\/chat\/completions$//')"
 export OPENAI_API_BASE_URLS
 
-OPENAI_API_KEYS="$(grep -o '"access_token":"[^"]*' "/tmp/jwt" | sed 's/"access_token":"//')"
+# Prefer JWT_TOKEN when the platform injects it; otherwise read access_token from /tmp/jwt.
+if [ -n "${JWT_TOKEN:-}" ]; then
+    OPENAI_API_KEYS="$JWT_TOKEN"
+else
+    OPENAI_API_KEYS="$(grep -o '"access_token":"[^"]*' "/tmp/jwt" | sed 's/"access_token":"//')"
+fi
 export OPENAI_API_KEYS
 
 export WEBUI_AUTH=False
