@@ -20,7 +20,7 @@ Below illustrates an example of the deployed AMP and leverages a simple query us
 
 ![](/assets/simple-example.png)
 
-![](/assets/setup-model-4.png)
+![](/assets/example-with-attachments.png)
 
 
 ## Deployment
@@ -86,5 +86,6 @@ Open **Edit connection** (gear on the connection). Set **Auth** to **Bearer**, p
 
 Chat, attachments, and model selection behave the same as in **Deployment 1**; only deployment and how credentials are supplied differ.
 
+![](/assets/setup-model-4.png)
 
 Copyright (c) 2026 - Cloudera, Inc.
